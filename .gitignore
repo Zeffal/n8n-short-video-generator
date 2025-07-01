@@ -1,3 +1,11 @@
-# Ignore environment files and folders
-.env
-env/
+# Ignore python files
+python/.env
+python/env/
+
+# Ignore typescript files
+typescript/node_modules
+typescript/package-lock.json
+typescript/package.json
+typescript/.env
+
+.gitignore

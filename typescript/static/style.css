@@ -1,0 +1,186 @@
+html, body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    width: 100vw;
+    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%, #6a82fb 100%);
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+} /* Soft purple to pink to blue */
+
+.container {
+    max-width: 1100px;
+    margin: 3rem auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2.5rem 2rem 2rem 2rem;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+    position: relative;
+    box-sizing: border-box;
+    overflow: visible;
+}
+
+.side-by-side-wrapper {
+    display: flex;
+    gap: 48px;
+    align-items: stretch;
+    width: 100%;
+    margin-top: 0;
+    justify-content: center;
+    height: 100%;
+}
+
+.side-form {
+    flex: 1 1 350px;
+    max-width: 420px;
+    background: #f8f5ff;
+    padding: 24px 20px 24px 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #b388ff30;
+}
+
+.side-video {
+    flex: 1 1 480px;
+    max-width: 520px;
+    background: #f8f5ff;
+    padding: 24px 20px 24px 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #b388ff30;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+@media (max-width: 900px) {
+    .side-by-side-wrapper {
+        flex-direction: column;
+        gap: 24px;
+    }
+    .side-form, .side-video {
+        max-width: 100%;
+    }
+}
+
+
+h1 {
+    text-align: center;
+    color: #7c3aed;
+    text-shadow: 0 0 8px #a18cd1, 0 0 16px #6a82fb;
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+    letter-spacing: 1px;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #5f4b8b;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+textarea, input, select {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    margin: 0.5rem 0 1.2rem 0;
+    border: 1.5px solid #d1c4e9;
+    border-radius: 8px;
+    background: #f3eaff;
+    font-size: 1rem;
+    transition: border 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(160, 130, 255, 0.04);
+    outline: none;
+}
+
+textarea:focus, input:focus, select:focus {
+    border: 1.5px solid #7c3aed;
+    box-shadow: 0 0 8px #b388ff;
+    background: #f8f5ff;
+}
+
+button {
+    background: linear-gradient(90deg, #7c3aed 0%, #6a82fb 100%);
+    color: #fff;
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 12px 0 #b388ff80;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    margin-top: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+button:hover, button:focus {
+    background: linear-gradient(90deg, #6a82fb 0%, #7c3aed 100%);
+    box-shadow: 0 4px 24px 0 #7c3aed80;
+    transform: translateY(-2px) scale(1.03);
+}
+
+#result {
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: 500;
+    color: #6a82fb;
+    min-height: 1.5em;
+}
+
+#videoSection {
+    background: rgba(122, 98, 255, 0.08);
+    border-radius: 14px;
+    box-shadow: 0 2px 16px 0 #b388ff30;
+    padding: 1.5rem 1rem 1.2rem 1rem;
+    text-align: center;
+    border: 1.5px solid #d1c4e9;
+    animation: fadeIn 0.7s;
+    margin-bottom: 0;
+}
+
+#videoSection h2 {
+    color: #7c3aed;
+    margin-bottom: 1.2rem;
+    text-shadow: 0 0 6px #b388ff60;
+}
+
+#videoPlayer {
+    border-radius: 10px;
+    box-shadow: 0 2px 16px 0 #7c3aed30;
+    border: 2px solid #b388ff60;
+    background: #fff;
+    margin-bottom: 1rem;
+    justify-self: center;
+    max-width: 260px;
+    width: 100%;
+    height: auto;
+}
+
+#downloadBtn {
+    display: inline-block;
+    margin-top: 1rem;
+    background: linear-gradient(90deg, #6a82fb 0%, #7c3aed 100%);
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 2px 8px 0 #b388ff60;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    letter-spacing: 0.5px;
+}
+
+#downloadBtn:hover, #downloadBtn:focus {
+    background: linear-gradient(90deg, #7c3aed 0%, #6a82fb 100%);
+    box-shadow: 0 4px 16px 0 #7c3aed80;
+    transform: translateY(-2px) scale(1.04);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px);}
+    to { opacity: 1; transform: translateY(0);}
+}

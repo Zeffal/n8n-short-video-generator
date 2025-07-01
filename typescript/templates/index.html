@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>N8N Test</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="side-by-side-wrapper">
+            <div class="side-form">
+                <h1 style="text-align:center; color:#7c3aed; margin-bottom:1.5rem;">N8N Test</h1>
+                <form id="mainForm">
+                <label>Main Topic:</label>
+                <textarea name="mainTopic" required></textarea>
+
+                <label>Duration:</label>
+                <select name="duration" required>
+                    <option value="30 Seconds">30 Seconds</option>
+                    <option value="1 Minute">1 Minute</option>
+                    <option value="2 Minutes">2 Minutes</option>
+                </select>
+
+                <label>Video Type:</label>
+                <select name="videoType" required>
+                    <option value="From user idea">From user idea</option>
+                    <option value="From transcript">From transcript</option>
+                </select>
+
+                <label>TTS Voice:</label>
+                <select name="ttsVoice" required>
+                    <option value="af_alloy">af_alloy</option>
+                    <option value="af_aoede">af_aoede</option>
+                    <option value="af_bella">af_bella</option>
+                    <option value="af_heart">af_heart</option>
+                    <option value="af_jadzia">af_jadzia</option>
+                    <option value="af_jessica">af_jessica</option>
+                    <option value="af_kore">af_kore</option>
+                    <option value="af_nicole">af_nicole</option>
+                    <option value="af_nova">af_nova</option>
+                    <option value="af_river">af_river</option>
+                    <option value="af_sarah">af_sarah</option>
+                    <option value="af_sky">af_sky</option>
+                    <option value="am_adam">am_adam</option>
+                    <option value="am_echo">am_echo</option>
+                    <option value="am_eric">am_eric</option>
+                    <option value="am_fenrir">am_fenrir</option>
+                    <option value="am_liam">am_liam</option>
+                    <option value="am_michael">am_michael</option>
+                    <option value="am_onyx">am_onyx</option>
+                    <option value="am_puck">am_puck</option>
+                    <option value="am_santa">am_santa</option>
+                </select>
+
+                <button type="submit">Submit</button>
+                <p id="result"></p>
+            </form>
+            </div>
+            <div id="videoSection" class="side-video" style="display:none;">
+                <h2>Completed Video</h2>
+                <video id="videoPlayer" width="320" controls></video>
+                <br>
+                <a id="downloadBtn" href="#" download>Download Video</a>
+                <div id="videoMeta" style="margin-top:1.5rem;">
+                    <div id="videoTitle" style="font-weight:600; color:#7c3aed; font-size:1.1rem;"></div>
+                    <div id="videoDescription" style="margin-top:0.5rem; color:#444;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../static/script.js"></script>
+
+</body>
+</html>
