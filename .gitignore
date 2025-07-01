@@ -4,8 +4,6 @@ python/env/
 
 # Ignore typescript files
 typescript/node_modules
-typescript/package-lock.json
-typescript/package.json
 typescript/.env
 
 .gitignore
