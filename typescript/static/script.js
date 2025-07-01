@@ -6,20 +6,28 @@ function updateVideoSection(videoUrl, title = '', description = '') {
     const downloadBtn = document.getElementById("downloadBtn");
     const videoTitle = document.getElementById("videoTitle");
     const videoDescription = document.getElementById("videoDescription");
+    let loaderContainer = document.getElementById("videoLoaderContainer");
     let loading = document.getElementById("videoLoading");
+    let loadingMsg = document.getElementById("videoLoadingMsg");
 
     if (!videoSection) return;
     videoSection.style.display = "block";
 
-    if (!loading) {
+    if (!loaderContainer) {
+        loaderContainer = document.createElement("div");
+        loaderContainer.id = "videoLoaderContainer";
+        loaderContainer.className = "loader-container d-flex justify-content-center align-items-center";
+        loaderContainer.style.height = "100%";
         loading = document.createElement("div");
         loading.id = "videoLoading";
-        loading.innerText = "Loading video...";
-        loading.style.margin = "1rem 0";
-        loading.style.color = "#7c3aed";
-        loading.style.fontWeight = "bold";
-        loading.style.fontSize = "1.1rem";
-        videoSection.insertBefore(loading, videoPlayer);
+        loading.className = "loader";
+        loadingMsg = document.createElement("div");
+        loadingMsg.id = "videoLoadingMsg";
+        loadingMsg.className = "loader-message";
+        loadingMsg.innerText = "Please wait for a moment...";
+        loaderContainer.appendChild(loading);
+        loaderContainer.appendChild(loadingMsg);
+        videoSection.insertBefore(loaderContainer, videoPlayer);
     }
 
     if (videoUrl) {
@@ -28,12 +36,12 @@ function updateVideoSection(videoUrl, title = '', description = '') {
         downloadBtn.href = videoUrl;
         downloadBtn.download = "completed_video.mp4";
         downloadBtn.style.display = "inline-block";
-        loading.style.display = "none";
+        loaderContainer.style.display = "none";
         if (videoTitle) videoTitle.textContent = title || '';
         if (videoDescription) videoDescription.textContent = description || '';
     } else {
-        loading.innerText = "Video not available yet. Please wait or try again.";
-        loading.style.display = "block";
+        loaderContainer.style.display = "flex";
+        if (loadingMsg) loadingMsg.innerText = "Please wait for a moment...";
         videoPlayer.style.display = "none";
         downloadBtn.style.display = "none";
         if (videoTitle) videoTitle.textContent = '';

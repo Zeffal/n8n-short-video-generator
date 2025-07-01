@@ -22,6 +22,28 @@ html, body {
     overflow: visible;
 }
 
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.loader-message {
+  margin-top: 1.2rem;
+  color: #7c3aed;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.loader {
+  height: 60px;
+  aspect-ratio: 1;
+  position: relative;
+}
+
 .side-by-side-wrapper {
     display: flex;
     gap: 48px;
@@ -183,4 +205,10 @@ button:hover, button:focus {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(30px);}
     to { opacity: 1; transform: translateY(0);}
+}
+
+@keyframes l20 { 
+ 30%,70% {transform:rotate(0deg)}
+ 49.99%  {transform:rotate(0.2deg)}
+ 50%     {transform:rotate(-0.2deg)}
 }
