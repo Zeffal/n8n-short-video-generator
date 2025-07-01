@@ -111,6 +111,18 @@ document.getElementById("mainForm").addEventListener("submit", async (e) => {
 // Only poll after form submission
 let pollIntervalId = null;
 
-window.addEventListener("DOMContentLoaded", () => {
-    pollLatestVideo(); // Initial fetch (no interval)
+window.addEventListener("DOMContentLoaded", async () => {
+    // Do an immediate fetch first
+    const found = await pollLatestVideo();
+    if (!found) {
+        // Only start polling if video is not yet available
+        if (pollIntervalId) clearInterval(pollIntervalId);
+        pollIntervalId = setInterval(async () => {
+            const found = await pollLatestVideo();
+            if (found) {
+                clearInterval(pollIntervalId);
+                pollIntervalId = null;
+            }
+        }, 5000);
+    }
 });
