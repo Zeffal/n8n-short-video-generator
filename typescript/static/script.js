@@ -60,6 +60,7 @@ async function pollLatestVideo() {
         const resp = await fetch(url);
         if (resp.ok) {
             const data = await resp.json();
+            console.log('[pollLatestVideo] Backend response:', data); // Debug log
             const videoUrl = data.video_url;
             const title = data.title || '';
             const description = data.description || '';
@@ -96,6 +97,8 @@ function getDeviceId() {
 const deviceId = getDeviceId();
 
 document.getElementById("mainForm").addEventListener("submit", async (e) => {
+    // Set flag in localStorage to indicate video generation in progress
+    localStorage.setItem('video_generation_in_progress', 'true');
     e.preventDefault();
 
     const formData = {
@@ -126,6 +129,8 @@ document.getElementById("mainForm").addEventListener("submit", async (e) => {
         if (found) {
             clearInterval(pollIntervalId);
             pollIntervalId = null;
+            // Clear the in-progress flag when video is ready
+            localStorage.removeItem('video_generation_in_progress');
         }
     }, 5000);
 });
@@ -139,5 +144,17 @@ window.addEventListener("DOMContentLoaded", async () => {
     if (deviceId) {
         const found = await pollLatestVideo();
         // If no video, section stays blank
+        // If a video generation is in progress, resume polling
+        if (localStorage.getItem('video_generation_in_progress') === 'true') {
+            if (pollIntervalId) clearInterval(pollIntervalId);
+            pollIntervalId = setInterval(async () => {
+                const found = await pollLatestVideo();
+                if (found) {
+                    clearInterval(pollIntervalId);
+                    pollIntervalId = null;
+                    localStorage.removeItem('video_generation_in_progress');
+                }
+            }, 5000);
+        }
     }
 });
