@@ -49,36 +49,72 @@ app.post('/submit', async (req: Request, res: Response) => {
     'Image Provider': 'together.ai',
     'BGM music': process.env.BGM_MUSIC,
     'Watermark Logo': process.env.WATERMARK_LOGO,
+    'Device ID': data.device_id, // Store device_id in Baserow
   };
   try {
-    const response = await fetch(WEBHOOK_URL!, {
+    // Send to n8n webhook
+    await fetch(WEBHOOK_URL!, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const text = await response.text();
-    res.json({ message: 'Sent to n8n', status: response.status, n8n_response: text });
+
+    // Wait for a moment to allow Baserow to update (ideally, webhook should return the new row ID)
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    // Fetch latest row matching the request
+    const response = await fetch(BASEROW_TABLE_API!, {
+      headers: { Authorization: `Token ${BASEROW_TOKEN}` },
+    });
+    const dataRows = await response.json();
+    const rows = dataRows.results || [];
+    // Find the most recent row that matches this device
+    const matchingRow = rows
+      .filter((row: any) => row['Device ID'] === data.device_id)
+      .sort((a: any, b: any) => b.id - a.id)[0];
+    if (matchingRow) {
+      res.json({ message: 'Sent to n8n', video_id: matchingRow.id });
+    } else {
+      res.json({ message: 'Sent to n8n', video_id: null });
+    }
   } catch (e: any) {
     res.status(500).json({ error: e.toString() });
   }
 });
 
-app.get('/get_video', async (_req: Request, res: Response) => {
+app.get('/get_video', async (req: Request, res: Response) => {
   console.log('[GET /get_video] Request received');
-
+  const videoId = req.query.video_id;
+  const deviceId = req.query.device_id;
   try {
     const response = await fetch(BASEROW_TABLE_API!, {
       headers: { Authorization: `Token ${BASEROW_TOKEN}` },
     });
     const data = await response.json();
     const rows = data.results || [];
-    if (!rows.length) {
-      return res.status(404).json({ error: 'No videos found.' });
+    let targetRow;
+    if (videoId) {
+      targetRow = rows.find((row: any) => String(row.id) === String(videoId));
+      if (!targetRow) {
+        return res.status(404).json({ error: 'Video not found for this ID.' });
+      }
+    } else if (deviceId) {
+      // Find latest video for this device
+      const deviceRows = rows.filter((row: any) => row['Device ID'] === deviceId);
+      if (!deviceRows.length) {
+        return res.status(404).json({ error: 'No video found for this device.' });
+      }
+      targetRow = deviceRows.reduce((a: any, b: any) => (a.id > b.id ? a : b));
+    } else {
+      // Fallback: latest video overall (should not be used in new flow)
+      if (!rows.length) {
+        return res.status(404).json({ error: 'No videos found.' });
+      }
+      targetRow = rows.reduce((a: any, b: any) => (a.id > b.id ? a : b));
     }
-    const latestRow = rows.reduce((a: any, b: any) => (a.id > b.id ? a : b));
-    const video_url = latestRow[VIDEO_FIELD!];
-    const title = latestRow['Title'] || '';
-    const description = latestRow['Description'] || '';
+    const video_url = targetRow[VIDEO_FIELD!];
+    const title = targetRow['Title'] || '';
+    const description = targetRow['Description'] || '';
     if (!video_url) {
       return res.status(404).json({ error: 'No video URL available.' });
     }

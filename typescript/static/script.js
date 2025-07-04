@@ -52,7 +52,12 @@ function updateVideoSection(videoUrl, title = '', description = '') {
 
 async function pollLatestVideo() {
     try {
-        const resp = await fetch("/get_video");
+        let url = "/get_video";
+        // Always use device_id for polling
+        if (deviceId) {
+            url += `?device_id=${encodeURIComponent(deviceId)}`;
+        }
+        const resp = await fetch(url);
         if (resp.ok) {
             const data = await resp.json();
             const videoUrl = data.video_url;
@@ -75,7 +80,20 @@ async function pollLatestVideo() {
 }
 
 
+
 // Form submission
+
+let requestedVideoId = null;
+// Device ID logic
+function getDeviceId() {
+    let deviceId = localStorage.getItem('device_id');
+    if (!deviceId) {
+        deviceId = crypto.randomUUID();
+        localStorage.setItem('device_id', deviceId);
+    }
+    return deviceId;
+}
+const deviceId = getDeviceId();
 
 document.getElementById("mainForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -85,6 +103,7 @@ document.getElementById("mainForm").addEventListener("submit", async (e) => {
         duration: e.target.duration.value,
         videoType: e.target.videoType.value,
         ttsVoice: e.target.ttsVoice.value,
+        device_id: deviceId,
     };
 
     const response = await fetch("/submit", {
@@ -97,7 +116,10 @@ document.getElementById("mainForm").addEventListener("submit", async (e) => {
     const resultMsg = document.getElementById("result");
     resultMsg.innerText = "";
 
-    // Start polling for the latest video after submission
+    // Save the video id returned by backend
+    requestedVideoId = result.video_id;
+
+    // Start polling for the requested device's video after submission
     if (pollIntervalId) clearInterval(pollIntervalId);
     pollIntervalId = setInterval(async () => {
         const found = await pollLatestVideo();
@@ -108,21 +130,14 @@ document.getElementById("mainForm").addEventListener("submit", async (e) => {
     }, 5000);
 });
 
+
 // Only poll after form submission
 let pollIntervalId = null;
 
+// On page load, poll for device's video if deviceId exists (otherwise show blank)
 window.addEventListener("DOMContentLoaded", async () => {
-    // Do an immediate fetch first
-    const found = await pollLatestVideo();
-    if (!found) {
-        // Only start polling if video is not yet available
-        if (pollIntervalId) clearInterval(pollIntervalId);
-        pollIntervalId = setInterval(async () => {
-            const found = await pollLatestVideo();
-            if (found) {
-                clearInterval(pollIntervalId);
-                pollIntervalId = null;
-            }
-        }, 5000);
+    if (deviceId) {
+        const found = await pollLatestVideo();
+        // If no video, section stays blank
     }
 });
