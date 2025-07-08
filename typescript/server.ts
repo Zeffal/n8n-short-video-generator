@@ -47,8 +47,10 @@ app.post('/submit', async (req: Request, res: Response) => {
       'In the style of should be soft purple or dominant purple to complement the theme and recess blue neon color theme, colorful dreams. filmstock: Sony a7R IV camera, Meike dreams 85mm F1.8 --ar 1:1 --v 6.0',
     'TTS Voice': data.ttsVoice,
     'Image Provider': 'together.ai',
-    'BGM music': process.env.BGM_MUSIC,
+    'BG Music': data.bgMusic,
+    'BG Music URL': process.env.BGM_MUSIC,
     'Watermark Logo': process.env.WATERMARK_LOGO,
+    'Aspect Ratio': data.aspectRatio,
   };
   try {
     const response = await fetch(WEBHOOK_URL!, {
@@ -82,7 +84,8 @@ app.get('/get_video', async (_req: Request, res: Response) => {
     if (!video_url) {
       return res.status(404).json({ error: 'No video URL available.' });
     }
-    res.json({ video_url, title, description });
+    const status = latestRow['Status'] || 'ready';
+    res.json({ video_url, title, description, status });
   } catch (e: any) {
     res.status(500).json({ error: e.toString() });
   }
