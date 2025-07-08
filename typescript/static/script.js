@@ -58,17 +58,53 @@ async function pollLatestVideo() {
             const videoUrl = data.video_url;
             const title = data.title || '';
             const description = data.description || '';
-            if (videoUrl && videoUrl !== lastVideoUrl) {
+            const status = (data.status || '').toLowerCase();
+            const videoId = data.video_id || null;
+            const mainContent = document.getElementById('mainContent');
+            const loadingContainer = document.getElementById('loadingContainer');
+            const loadingMsg = document.getElementById('videoLoadingMsg');
+            let warnDiv = document.getElementById('processingWarning');
+            if (!warnDiv) {
+                warnDiv = document.createElement('div');
+                warnDiv.id = 'processingWarning';
+                warnDiv.style.color = '#d97706';
+                warnDiv.style.fontWeight = 'bold';
+                warnDiv.style.marginTop = '1.25rem';
+                if (loadingContainer) loadingContainer.appendChild(warnDiv);
+            }
+
+            // If a new video is being processed, or status is processing, show loading for all users
+            if ((status && status !== 'ready' && status !== 'done') || (videoId && videoId !== lastVideoId && status === 'processing')) {
+                if (mainContent) mainContent.style.display = 'none';
+                if (loadingContainer) loadingContainer.style.display = 'block';
+                if (loadingMsg) loadingMsg.innerText = 'Please wait for a moment...';
+                warnDiv.innerText = 'Another user is generating a video. Please wait...';
+                warnDiv.style.display = 'block';
+                lastVideoId = videoId;
+                lastStatus = status;
+                return;
+            }
+
+            // If new completed video appears, show it
+            if (videoUrl && (videoId !== lastVideoId || status !== lastStatus)) {
+                lastVideoId = videoId;
+                lastStatus = status;
                 lastVideoUrl = videoUrl;
                 updateVideoSection(videoUrl, title, description);
-                // Show main content (form + video), hide loading
-                const mainContent = document.getElementById('mainContent');
-                const loadingContainer = document.getElementById('loadingContainer');
                 if (mainContent) mainContent.style.display = 'block';
                 if (loadingContainer) loadingContainer.style.display = 'none';
-                return true; // Stop polling
-            } else if (videoUrl) {
+                warnDiv.innerText = '';
+                warnDiv.style.display = 'none';
+                return;
+            }
+            // If video is ready, keep showing it
+            if (videoUrl && status === 'ready') {
                 updateVideoSection(videoUrl, title, description);
+                if (mainContent) mainContent.style.display = 'block';
+                if (loadingContainer) loadingContainer.style.display = 'none';
+                warnDiv.innerText = '';
+                warnDiv.style.display = 'none';
+                return;
             }
         } else {
             updateVideoSection(null);
@@ -76,7 +112,6 @@ async function pollLatestVideo() {
     } catch {
         updateVideoSection(null);
     }
-    return false;
 }
 
 
@@ -141,24 +176,19 @@ document.getElementById("mainForm").addEventListener("submit", async (e) => {
 
 // Only poll after form submission
 let pollIntervalId = null;
+let lastVideoId = null;
+let lastStatus = null;
 
 window.addEventListener("DOMContentLoaded", async () => {
     const mainContent = document.getElementById('mainContent');
     const loadingContainer = document.getElementById('loadingContainer');
     if (mainContent) mainContent.style.display = 'none';
     if (loadingContainer) loadingContainer.style.display = 'block';
-    const found = await pollLatestVideo();
-    if (!found) {
-        if (pollIntervalId) clearInterval(pollIntervalId);
-        pollIntervalId = setInterval(async () => {
-            const found = await pollLatestVideo();
-            if (found) {
-                clearInterval(pollIntervalId);
-                pollIntervalId = null;
-            }
-        }, 1000);
-    } else {
-        if (mainContent) mainContent.style.display = 'block';
-        if (loadingContainer) loadingContainer.style.display = 'none';
-    }
+    // Always poll every second, for all users
+    if (pollIntervalId) clearInterval(pollIntervalId);
+    pollIntervalId = setInterval(async () => {
+        await pollLatestVideo();
+    }, 1000);
+    // Do one immediate fetch
+    await pollLatestVideo();
 });
