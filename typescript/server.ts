@@ -81,11 +81,9 @@ app.get('/get_video', async (_req: Request, res: Response) => {
     const video_url = latestRow[VIDEO_FIELD!];
     const title = latestRow['Title'] || '';
     const description = latestRow['Description'] || '';
-    if (!video_url) {
-      return res.status(404).json({ error: 'No video URL available.' });
-    }
     const status = latestRow['Status'] || 'ready';
-    res.json({ video_url, title, description, status });
+    const video_id = latestRow['Video ID'] || latestRow['id'];
+    res.json({ video_url: video_url || '', title, description, status, video_id });
   } catch (e: any) {
     res.status(500).json({ error: e.toString() });
   }

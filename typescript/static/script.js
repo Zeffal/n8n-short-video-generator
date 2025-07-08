@@ -74,12 +74,19 @@ async function pollLatestVideo() {
             }
 
             // If a new video is being processed, or status is processing, show loading for all users
-            if ((status && status !== 'ready' && status !== 'done') || (videoId && videoId !== lastVideoId && status === 'processing')) {
+            if (status && status !== 'ready' && status !== 'done') {
+                // Only reload once per processing event using sessionStorage
+                if (!sessionStorage.getItem('hasReloadedForProcessing')) {
+                    sessionStorage.setItem('hasReloadedForProcessing', 'true');
+                    location.reload();
+                    return;
+                }
+                // Always force mainContent and videoSection hidden, loadingContainer shown during processing
                 if (mainContent) mainContent.style.display = 'none';
                 if (loadingContainer) loadingContainer.style.display = 'block';
-                if (loadingMsg) loadingMsg.innerText = 'Please wait for a moment...';
-                warnDiv.innerText = 'Another user is generating a video. Please wait...';
-                warnDiv.style.display = 'block';
+                const videoSection = document.getElementById('videoSection');
+                if (videoSection) videoSection.style.display = 'none';
+                if (loadingMsg) loadingMsg.innerText = 'Generating a video, please wait for a moment...';
                 lastVideoId = videoId;
                 lastStatus = status;
                 return;
@@ -87,21 +94,29 @@ async function pollLatestVideo() {
 
             // If new completed video appears, show it
             if (videoUrl && (videoId !== lastVideoId || status !== lastStatus)) {
+                // Remove reload flag when video is ready
+                sessionStorage.removeItem('hasReloadedForProcessing');
                 lastVideoId = videoId;
                 lastStatus = status;
                 lastVideoUrl = videoUrl;
                 updateVideoSection(videoUrl, title, description);
                 if (mainContent) mainContent.style.display = 'block';
                 if (loadingContainer) loadingContainer.style.display = 'none';
+                const videoSection = document.getElementById('videoSection');
+                if (videoSection) videoSection.style.display = 'block';
                 warnDiv.innerText = '';
                 warnDiv.style.display = 'none';
                 return;
             }
             // If video is ready, keep showing it
             if (videoUrl && status === 'ready') {
+                // Remove reload flag when video is ready
+                sessionStorage.removeItem('hasReloadedForProcessing');
                 updateVideoSection(videoUrl, title, description);
                 if (mainContent) mainContent.style.display = 'block';
                 if (loadingContainer) loadingContainer.style.display = 'none';
+                const videoSection = document.getElementById('videoSection');
+                if (videoSection) videoSection.style.display = 'block';
                 warnDiv.innerText = '';
                 warnDiv.style.display = 'none';
                 return;
