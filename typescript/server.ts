@@ -35,6 +35,19 @@ app.get('/', (_req: Request, res: Response) => {
   res.sendFile(path.join(PROJECT_ROOT, 'templates', 'index.html'));
 });
 
+// Helper to update Activity row in Baserow
+async function updateActivity(activity: string) {
+  const api = process.env.ACTIVITY_API!.replace('{row_id}', process.env.ACTIVITY_ROW_ID!);
+  await fetch(api, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Token ${process.env.BASEROW_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ Activity: activity })
+  });
+}
+
 app.post('/submit', async (req: Request, res: Response) => {
   console.log('[POST /submit] Incoming:', req.body);
 
@@ -53,6 +66,8 @@ app.post('/submit', async (req: Request, res: Response) => {
     'Aspect Ratio': data.aspectRatio,
   };
   try {
+    // Set Activity to 'Starting' when a request is submitted
+    await updateActivity('Starting');
     const response = await fetch(WEBHOOK_URL!, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -83,7 +98,25 @@ app.get('/get_video', async (_req: Request, res: Response) => {
     const description = latestRow['Description'] || '';
     const status = latestRow['Status'] || 'ready';
     const video_id = latestRow['Video ID'] || latestRow['id'];
+
     res.json({ video_url: video_url || '', title, description, status, video_id });
+  } catch (e: any) {
+    res.status(500).json({ error: e.toString() });
+  }
+});
+
+app.get('/get_activity', async (_req: Request, res: Response) => {
+  try {
+    const activityApi = process.env.ACTIVITY_API!.replace('{row_id}', process.env.ACTIVITY_ROW_ID!);
+    const activityResp = await fetch(activityApi, {
+      headers: { 'Authorization': `Token ${process.env.BASEROW_TOKEN}` }
+    });
+    if (activityResp.ok) {
+      const activityData = await activityResp.json();
+      res.json({ Activity: activityData['Activity'] });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch Activity' });
+    }
   } catch (e: any) {
     res.status(500).json({ error: e.toString() });
   }

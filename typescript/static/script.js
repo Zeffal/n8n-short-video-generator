@@ -52,9 +52,48 @@ function updateVideoSection(videoUrl, title = '', description = '') {
 
 async function pollLatestVideo() {
     try {
-        const resp = await fetch("/get_video");
-        if (resp.ok) {
-            const data = await resp.json();
+        // Check Activity row for global state
+        const activityResp = await fetch('/get_activity');
+        const activityData = await activityResp.json();
+        const activity = activityData.Activity;
+
+        // Show loadingContainer only when Activity is 'Starting', hide only when Activity is 'Finish'
+        const mainContent = document.getElementById('mainContent');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const videoSection = document.getElementById('videoSection');
+        const loadingMsg = document.getElementById('videoLoadingMsg');
+        const warnDiv = document.getElementById('processingWarning');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (activity === 'Starting') {
+            if (mainContent) mainContent.style.display = 'none';
+            if (loadingContainer) loadingContainer.style.display = 'block';
+            if (videoSection) videoSection.style.display = 'none';
+            if (loadingMsg) loadingMsg.innerText = 'Generating a video, please wait for a moment...';
+            if (submitBtn) submitBtn.disabled = true;
+            return;
+        } else if (activity === 'Finish') {
+            if (mainContent) mainContent.style.display = 'block';
+            if (loadingContainer) loadingContainer.style.display = 'none';
+            if (videoSection) videoSection.style.display = 'block';
+            if (submitBtn) submitBtn.disabled = false;
+        } else {
+            // If Activity is neither 'Starting' nor 'Finish', default to loading
+            if (mainContent) mainContent.style.display = 'none';
+            if (loadingContainer) loadingContainer.style.display = 'block';
+            if (videoSection) videoSection.style.display = 'none';
+            if (warnDiv) {
+                warnDiv.innerText = 'Please wait...';
+                warnDiv.style.display = 'block';
+            }
+            if (submitBtn) submitBtn.disabled = true;
+            return;
+        }
+
+        // Continue with normal video polling logic
+        const response = await fetch('/get_video');
+        if (response.ok) {
+            const data = await response.json();
             const videoUrl = data.video_url;
             const title = data.title || '';
             const description = data.description || '';
